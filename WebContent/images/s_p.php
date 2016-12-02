@@ -1,0 +1,3 @@
+﻿(function() {
+	
+document.write('<!--noads-->');})();
