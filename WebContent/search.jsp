@@ -1,5 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@page import="java.sql.ResultSet" %>
+<%@page import="service.DBService" %>
+<%@page import="bean.VideoInfo" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -9,23 +12,44 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="renderer" content="webkit">
 <meta name="applicable-device" content="pc,mobile">
-<title>西瓜哥电影网-高级搜索</title>
+<title>鹏飞哥视频网-高级搜索</title>
 
 <link href="./css/default.css" rel="stylesheet">
-<script src="./js/push.js.下载"></script><script>var sitePath=''</script>
-<script src="./js/1.7.2.min.js.下载"></script>
-<script src="./js/superslide.2.1.js.下载"></script>
-<script src="./js/jq.js.下载"></script>
-<script src="./js/common.js.下载"></script>
-<script src="./js/function.js.下载"></script>
-<script src="./js/jquery.lazyload.js.下载"></script>
+<script src="./js/push.js"></script><script>var sitePath=''</script>
+<script src="./js/1.7.2.min.js"></script>
+<script src="./js/superslide.2.1.js"></script>
+<script src="./js/jq.js"></script>
+<script src="./js/common.js"></script>
+<script src="./js/function.js"></script>
+<script src="./js/jquery.lazyload.js"></script>
 <script type="text/javascript">
 if (window!=top)
 top.location.href =window.location.href;
 </script>
-<script src="./js/rich.js.下载" type="text/javascript"></script>
+<script src="./js/rich.js" type="text/javascript"></script>
 </head>
 <body>
+<%!int id = 0; int typeClass = 0; String searchword; String order; int pageNum=1; int pageCur=1;%>
+<%
+try{
+request.setCharacterEncoding("UTF-8");
+response.setContentType("text/html;charset=UTF-8");
+order = ((request.getParameter("order")=="" || request.getParameter("order")==null)?"time":request.getParameter("order"));
+searchword = new String(request.getParameter("searchword").getBytes("ISO-8859-1"),"utf-8");
+//order = ((request.getParameter("order")=="" || request.getParameter("order")==null)?"time":request.getParameter("order"));
+//order = ((request.getParameter("order")=="" || request.getParameter("order")==null)?"time":request.getParameter("order"));
+//order = new String(order.getBytes("ISO-8859-1"),"utf-8");
+id = Integer.parseInt((request.getParameter("id")==null||request.getParameter("id")=="")?"0":request.getParameter("id"));
+typeClass = Integer.parseInt((request.getParameter("typeClass")==null||request.getParameter("typeClass")=="")?"0":request.getParameter("typeClass"));
+pageCur = ((request.getParameter("page")==""||request.getParameter("page")==null)?1:(Integer.parseInt(request.getParameter("page"))));
+}
+catch(Exception e)
+{
+	e.printStackTrace();
+}
+
+%>
+
 <!----------------------------- header start -------------------------------->
 <jsp:include page="./head.jsp"></jsp:include>
 <!------------------------------ header end --------------------------------->
@@ -33,19 +57,26 @@ top.location.href =window.location.href;
 <div id="subnav" class="margin-b10">
 <div class="wrap fn-clear">
 <div class="subnav-tv fn-left"><strong class="tv">电视剧：</strong>
-<a href="http://www.xiguage.net/f/12.html">大陆剧</a><em>|</em>
-<a href="http://www.xiguage.net/f/13.html">港台剧</a><em>|</em>
-<a href="http://www.xiguage.net/f/14.html">日韩剧</a><em>|</em>
-<a href="http://www.xiguage.net/f/15.html">欧美剧</a><em>|</em>
+<%
+String sql = "select name,id from concreteclass where id!=pid and pid=(select id from concreteclass where name='地区');";
+ResultSet rs;
+rs = DBService.query(sql);
+while(rs.next())
+{
+%>
+<a href='./search.jsp?typeClass=<%=DBService.queryObject("select id from typeclass where name='电视';") %>&id=<%=rs.getInt("id") %>&searchword=""'>
+<%=rs.getString("name") %></a><em>|</em>
+<%} %>
 </div>
 <div class="subnav-movie fn-right"><strong class="movie">电影：</strong>
-<a href="http://www.xiguage.net/f/5.html">动作片</a><em>|</em>
-<a href="http://www.xiguage.net/f/6.html">喜剧片</a><em>|</em>
-<a href="http://www.xiguage.net/f/7.html">爱情片</a><em>|</em>
-<a href="http://www.xiguage.net/f/8.html">科幻片</a><em>|</em>
-<a href="http://www.xiguage.net/f/9.html">剧情片</a><em>|</em>
-<a href="http://www.xiguage.net/f/10.html">恐怖片</a><em>|</em>
-<a href="http://www.xiguage.net/f/11.html">战争片</a><em>|</em>
+<%
+sql = "select name,id from concreteclass where id!=pid and pid=(select id from concreteclass where name='分类');";
+rs = DBService.query(sql);
+while(rs.next())
+{
+%>
+<a href='./search.jsp?typeClass=<%=DBService.queryObject("select id from typeclass where name='电影';") %>&id=<%=rs.getInt("id") %>&searchword=""'><%=rs.getString("name") %></a><em>|</em>
+<%} %>
 </div>
 </div>
 </div>
@@ -54,253 +85,134 @@ top.location.href =window.location.href;
 <div id="content" class="wrap clearfix">
 <div class="content-left clearfix">
 <div class="ui-title">
-<h3 class="tt-tab">电影筛选&nbsp;&nbsp;<span class="ml19">展开筛选</span></h3>
+<h3 class="tt-tab">影视筛选&nbsp;&nbsp;<span class="ml19">展开筛选</span></h3>
 </div>
 <div class=" ui-cnt filter-focusdl mbfilter border-gray">
 <div class="filter-list fn-clear">
 <h5><i class="iconfont m-r-3 f-s-16">󰉿</i>按地区：</h5>
 <ul>
+<%
+sql = "select * from concreteclass where pid = (select id from concreteClass where name='地区');";
+rs = DBService.query(sql);
+while(rs.next())
+{
+	if(rs.getString("name").equals("地区"))
+	{
+	%>
 <li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=">全部</a>
+<a href='./search.jsp?id=<%=rs.getInt("id") %>&typeCLass=0&searchword=' <%=(id==0||id==rs.getInt("id")?"class='on'":"") %> >全部</a>
 </li>
+	<%
+	}
+	else
+	{
+		%>
 <li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E7%BE%8E%E5%9B%BD">美国
+<a href='./search.jsp?id=<%=rs.getInt("id") %>&typeCLass=0&searchword=' <%=(id==rs.getInt("id")?"class='on'":"") %>><%=rs.getString("name") %>
 </a>
 </li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86" class="on">大陆
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E9%A6%99%E6%B8%AF">香港
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%8F%B0%E6%B9%BE">台湾
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E6%97%A5%E6%9C%AC">日本
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E9%9F%A9%E5%9B%BD">韩国
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E6%AC%A7%E7%BE%8E">欧美
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E6%B3%B0%E5%9B%BD">泰国
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%85%B6%E4%BB%96">其他
-</a>
-</li>
+		<%
+	}
+}
+%>
+
 </ul>
 </div>
 <div class="filter-list fn-clear">
 <h5><i class="iconfont m-r-3 f-s-16">󰁣</i>按年代：</h5>
 <ul>
+
+<%
+sql = "select * from concreteclass where pid = (select id from concreteclass where name='年代');";
+rs = DBService.query(sql);
+while(rs.next())
+{
+	if(rs.getString("name").equals("年代"))
+	{
+	%>
 <li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86" class="on">全部</a>
+<a href='./search.jsp?id=<%=rs.getInt("id") %>&typeCLass=0&searchword=' <%=(id==0||id==rs.getInt("id")?"class='on'":"") %> >全部</a>
 </li>
+	<%
+	}
+	else
+	{
+		%>
 <li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;year=2016">2016
+<a href='./search.jsp?id=<%=rs.getInt("id") %>&typeCLass=0&searchword=' <%=(id==rs.getInt("id")?"class='on'":"") %>><%=rs.getString("name") %>
 </a>
 </li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;year=2015">2015
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;year=2014">2014
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;year=2013">2013
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;year=2012">2012
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;year=2011">2011
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;year=2010">2010
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;year=2009">2009
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;year=2008">2008
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;year=2007">2007
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;year=2006">2006
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;year=2005">2005
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;year=%E6%9B%B4%E6%97%A9">更早
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;year=more">更早</a>
-</li>
+		<%
+	}
+}
+%>
+
 </ul>
 </div>
 <div class="filter-list fn-clear">
 <h5><i class="iconfont m-r-3 f-s-14">󰅙</i>按语言：</h5>
 <ul>
+
+<%
+sql = "select * from concreteclass where pid = (select id from concreteclass where name='语言');";
+rs = DBService.query(sql);
+while(rs.next())
+{
+	if(rs.getString("name").equals("语言"))
+	{
+	%>
 <li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86" class="on">全部</a>
+<a href='./search.jsp?id=<%=rs.getInt("id") %>&typeCLass=0&searchword=' <%=(id==0||id==rs.getInt("id")?"class='on'":"") %> >全部</a>
 </li>
+	<%
+	}
+	else
+	{
+		%>
 <li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;yuyan=%E5%9B%BD%E8%AF%AD">国语
+<a href='./search.jsp?id=<%=rs.getInt("id") %>&typeCLass=0&searchword=' <%=(id==rs.getInt("id")?"class='on'":"") %>><%=rs.getString("name") %>
 </a>
 </li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;yuyan=%E7%B2%A4%E8%AF%AD">粤语
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;yuyan=%E8%8B%B1%E8%AF%AD">英语
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;yuyan=%E6%97%A5%E8%AF%AD">日语
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;yuyan=%E9%9F%A9%E8%AF%AD">韩语
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;yuyan=%E6%B3%B0%E8%AF%AD">泰语
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;yuyan=%E6%B3%95%E8%AF%AD">法语
-</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;yuyan=%E5%85%B6%E4%BB%96">其他
-</a>
-</li>
+		<%
+	}
+}
+%>
+
+
 </ul>
 </div>
-<div class="filter-list filter-list-letter fn-clear">
-<h5><i class="iconfont m-r-3 f-s-14">󰃋</i>按字母：</h5>
-<ul>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86" class="on">全部</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=A">A</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=B">B</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=C">C</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=D">D</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=E">E</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=F">F</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=G">G</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=H">H</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=I">I</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=J">J</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=K">K</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=L">L</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=M">M</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=N">N</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=O">O</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=P">P</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=Q">Q</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=R">R</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=S">S</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=T">T</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=U">U</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=V">V</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=W">W</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=X">X</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=Y">Y</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=Z">Z</a>
-</li>
-<li>
-<a href="http://www.xiguage.net/search.php?searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86&amp;letter=0-9">0-9</a>
-</li>
-</ul>
-</div>
+
 <div class="ui-bar fn-clear">
 <ul class="view-mode">
 <li id="view-list"><a class="current"><i class="iconfont m-r-3 f-s-14">󰅙</i>选择排序方式time</a></li>
 </ul>
 <div class="view-filter">
-<a id="time" href="http://www.xiguage.net/search.php?page=1&amp;searchtype=5&amp;order=time&amp;tid=1&amp;area=%E5%A4%A7%E9%99%86&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=" class="order current" target="_self"><span>按时间</span></a>
-<a id="hits" href="http://www.xiguage.net/search.php?page=1&amp;searchtype=5&amp;order=hit&amp;tid=1&amp;area=%E5%A4%A7%E9%99%86&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=" class="order " target="_self"><span>按人气</span></a>
-<a id="pingfen" href="http://www.xiguage.net/search.php?page=1&amp;searchtype=5&amp;order=commend&amp;tid=1&amp;area=%E5%A4%A7%E9%99%86&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=" class="order " target="_self"><span>按评分</span></a>
+<%
+if(order.equals("click"))
+{
+%>
+<a id="time" href="./search.jsp?typeClass=<%=typeClass %>&id=<%=id %>&searchword=<%=searchword %>&order=time" class="order " target="_self"><span>按时间</span></a>
+<a id="hits" href="./search.jsp?typeClass=<%=typeClass %>&id=<%=id %>&searchword=<%=searchword %>&order=click" class="order current" target="_self"><span>按人气</span></a>
+<a id="pingfen" href="./search.jsp?typeClass=<%=typeClass %>&id=<%=id %>&searchword=<%=searchword %>&order=click" class="order " target="_self"><span>按评分</span></a>
+<%
+}
+else if(order.equals("click"))
+{
+%>
+<a id="time" href="./search.jsp?typeClass=<%=typeClass %>&id=<%=id %>&searchword=<%=searchword %>&order=time" class="order" target="_self"><span>按时间</span></a>
+<a id="hits" href="./search.jsp?typeClass=<%=typeClass %>&id=<%=id %>&searchword=<%=searchword %>&order=click" class="order" target="_self"><span>按人气</span></a>
+<a id="pingfen" href="./search.jsp?typeClass=<%=typeClass %>&id=<%=id %>&searchword=<%=searchword %>&order=click" class="order current" target="_self"><span>按评分</span></a>
+<%
+}
+else
+{
+%>
+<a id="time" href="./search.jsp?typeClass=<%=typeClass %>&id=<%=id %>&searchword=<%=searchword %>&order=time" class="order current" target="_self"><span>按时间</span></a>
+<a id="hits" href="./search.jsp?typeClass=<%=typeClass %>&id=<%=id %>&searchword=<%=searchword %>&order=click" class="order " target="_self"><span>按人气</span></a>
+<a id="pingfen" href="./search.jsp?typeClass=<%=typeClass %>&id=<%=id %>&searchword=<%=searchword %>&order=click" class="order " target="_self"><span>按评分</span></a>
+<%
+}
+%>
 </div>
 <div class="ui-pages  fn-right" id="short-page"></div>
 </div>
@@ -309,6 +221,70 @@ top.location.href =window.location.href;
 <div class="hello-box">
 <div class="module-content">
 <ul class="yun-list clearfix" id="yun-list">
+<%=order %>
+<%
+if((searchword==null||searchword=="") && id!=0 && typeClass!=0)
+{
+	pageNum = Integer.parseInt(DBService.queryObject("select count(*) from videoInfo where id="+id+" and typeClass = "+typeClass+" order by "+order+";" ).toString());
+	sql = "select * from videoInfo where id="+id+" and typeClass = "+typeClass+" order by "+order+" limit "+ (pageCur-1)*12 + ",12;";
+	
+}
+else if((searchword==null||searchword=="") && id!=0)
+{
+	pageNum = Integer.parseInt(DBService.queryObject("select count(*) from videoInfo where id="+id+" order by "+order+";" ).toString());
+	sql = "select * from videoInfo where id="+id+" order by "+order+" limit "+ (pageCur-1)*12 + ",12;";
+}
+else if(searchword!=null && searchword!="")
+{
+	pageNum = Integer.parseInt(DBService.queryObject("select count(*) from videoInfo where name like'%"+searchword+"%' or actors like '%"+searchword+"%' or daoyan like '%"+searchword+"%' or summary like '%"+searchword+"%' order by "+order+";" ).toString());
+	sql = "select * from videoInfo where name like '%"+searchword+"%' or actors like '%"+searchword+"%' or daoyan like '%"+searchword+"%' or summary like '%"+searchword+"%' order by "+order+" limit "+ (pageCur-1)*12 + ",12;";
+}
+else
+{
+	pageNum = Integer.parseInt(DBService.queryObject("select count(*) from videoInfo order by "+order+";" ).toString());
+	sql = "select * from videoInfo order by "+order+" limit "+ (pageCur-1)*12 + ",12;";
+}
+
+while(rs.next())
+{
+	VideoInfo vi = new VideoInfo();
+	try
+	{
+		vi.setName(rs.getString("name").trim());
+		vi.setSummary(rs.getString("summary").trim());
+		vi.setVideo(rs.getString("video").trim());
+		vi.setImage(rs.getString("image").trim());
+		vi.setCurnum(rs.getInt("curnum"));
+		vi.setAllnum(rs.getInt("allnum"));
+		vi.setActors(((rs.getString("actors") ==""||rs.getString("actors")==null)?"":rs.getString("actors")).trim());
+
+%>	
+	<li class="yun yun-large  border-gray">
+	<a class="yun-link" href='./showInfo?id=<%=rs.getInt("id") %>' title="<%=vi.getName() %>">
+	<div class="img">
+	<img class="lazy" data-original="<%=vi.getImage() %>" src="<%=vi.getImage() %>" alt="<%=vi.getName() %>" style="display: block;">
+	<span class="bgb">
+	<i class="bgbbg"></i>
+	<p class="name">HDTC</p>
+	<p class="other">剧情：<%=vi.getSummary().length()>60?vi.getSummary().substring(0,60)+"..":vi.getSummary() %></p>
+	</span>
+	</div>
+	<div class="text">
+	<p class="name"><%=vi.getName() %></p>
+	<p class="actor">主演：<%=vi.getActors() %></p>
+	</div>
+	</a>
+	</li>
+	
+<%
+}
+catch(Exception e)
+{
+	e.printStackTrace();
+}
+}
+%>
+
 <li class="yun yun-large  border-gray">
 <a class="yun-link" href="http://www.xiguage.net/m/30403.html" title="湄公河行动">
 <div class="img">
@@ -320,10 +296,11 @@ top.location.href =window.location.href;
 </span>
 </div>
 <div class="text">
-<p class="name">湄公河行动</p><p class="actor">主演：张涵予 彭于晏 孙淳 陈宝国 冯文娟 刘显达子 赵健 吴旭东 吴嘉龙</p>
+<p class="name">湄公河行动</p><p class="actor">主演：</p>
 </div>
 </a>
 </li>
+
 <li class="yun yun-large  border-gray">
 <a class="yun-link" href="http://www.xiguage.net/m/30597.html" title="盛先生的花儿">
 <div class="img">
@@ -854,16 +831,45 @@ top.location.href =window.location.href;
 </div>
 </section>
 <div class="page clearfix">
-<em>1</em>
-<a href="http://www.xiguage.net/search.php?page=2&amp;searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86">2</a>
-<a href="http://www.xiguage.net/search.php?page=3&amp;searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86">3</a>
-<a href="http://www.xiguage.net/search.php?page=4&amp;searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86">4</a>
-<a href="http://www.xiguage.net/search.php?page=5&amp;searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86">5</a>
-<a href="http://www.xiguage.net/search.php?page=6&amp;searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86">6</a>
-<a href="http://www.xiguage.net/search.php?page=7&amp;searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86">7</a>
-<a href="http://www.xiguage.net/search.php?page=8&amp;searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86">8</a>
-<a href="http://www.xiguage.net/search.php?page=2&amp;searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86">&gt;</a>
-<a href="http://www.xiguage.net/search.php?page=8&amp;searchtype=5&amp;order=time&amp;tid=1&amp;year=&amp;letter=&amp;yuyan=&amp;state=&amp;money=&amp;ver=&amp;jq=&amp;area=%E5%A4%A7%E9%99%86">..8</a>
+
+<%
+int start = pageCur<8?1:pageCur+8<pageNum?pageCur-4:pageNum-8;
+if(start!=1)
+{
+	%>
+	<a href='search.jsp?page=1&id=<%=id %>&typeClass=<%=typeClass %>&order=<%=order %>'>1..</a>
+	<%
+}
+if(pageCur!=1)
+{
+	%>
+	<a href='search.jsp?page=i&id=<%=id %>&typeClass=<%=typeClass %>&order=<%=order %>'>&lt;</a>
+	<%
+}
+for(int i=start;i<=((start+8)<pageNum?(start+8):pageNum);i++)
+{
+	if(i==pageCur)out.println("<em>"+i+"</em>");
+	else 
+	{
+	%>
+	<a href='search.jsp?page=i&id=<%=id %>&typeClass=<%=typeClass %>&order=<%=order %>'><%=i %></a>
+	<%
+	}
+}
+if(pageCur!=pageNum)
+{
+	%>
+	<a href='search.jsp?page=i&id=<%=id %>&typeClass=<%=typeClass %>&order=<%=order %>'>&gt;</a>
+	<%
+}
+if(start+8<pageNum)
+{
+	%>
+	<a href='search.jsp?page=<%=pageNum %>&id=<%=id %>&typeClass=<%=typeClass %>&order=<%=order %>'>..<%=pageNum %></a>
+	<%
+}
+%>
+
 </div>
 </div>
 </div>

@@ -1,5 +1,20 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
+<%@page import="java.sql.ResultSet" %>
+<%@page import="service.DBService" %>
+<%@page import="bean.VideoInfo" %>
+<%!int id=0;  int cur=1; %>
+<%
+id = Integer.parseInt((request.getParameter("id")==null||request.getParameter("id")=="")?"0":request.getParameter("id"));
+cur = Integer.parseInt((request.getParameter("cur")==null||request.getParameter("cur")=="")?"0":request.getParameter("cur"));
+VideoInfo vi = new VideoInfo();
+String sql = "select * from videoInfo where id=" + id +";";
+ResultSet rs = DBService.query(sql);
+if(rs.next())
+{
+	
+}
+%>
 <!DOCTYPE html>
 <html>
 <head>

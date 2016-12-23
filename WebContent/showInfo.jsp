@@ -1,5 +1,76 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
+<%@page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@page import="java.sql.ResultSet" %>
+<%@page import="service.DBService" %>
+<%@page import="bean.VideoInfo" %>
+
+<%! int id; VideoInfo vi = null; %>
+<%
+try{
+id = Integer.parseInt(request.getParameter("id"));
+}
+catch(Exception e)
+{
+	e.printStackTrace();
+	id=1;
+	//response.sendRedirect(request.getContextPath()+"/error.jsp?err="+request.getRequestURL());
+	//return;
+}
+
+//读取提示语
+String notice = "";
+String sql = "select notice from config;";
+ResultSet rs = DBService.query(sql);
+if(rs.next())
+{
+	notice = "<span style='color: #E53333;'>提示："+rs.getString("notice")+"</span>";
+}
+
+//点击次数加1
+sql = "update videoInfo set click=click+1 where id = "+id +";";
+DBService.update(sql);
+//读取视频信息
+sql = "select * from videoInfo where id = "+id+";";
+rs = DBService.query(sql);
+if(rs.next())
+{
+	vi = new VideoInfo();
+	try
+	{
+	vi.setArea(DBService.queryObject("select name from concreteClass where id = "+rs.getInt("area")+";").toString());
+	String [] s_property = new String[5];
+	String result_property = "";
+	s_property = rs.getString("property").split(" ",5);
+	for(int i=0;i<s_property.length;i++)
+	{
+		String tmp = DBService.queryObject("select name from concreteClass where id = "+Integer.parseInt(s_property[i])+";").toString();
+		if(i==0)result_property += (tmp!=null?tmp:"");
+		else
+			result_property += (tmp!=null?" "+tmp:"");
+	}
+	vi.setProperty(result_property.trim());
+	vi.setName(rs.getString("name").trim());
+	vi.setSummary(rs.getString("summary").trim());
+	vi.setVideo(rs.getString("video").trim());
+	vi.setImage(rs.getString("image").trim());
+	vi.setCurnum(rs.getInt("curnum"));
+	vi.setAllnum(rs.getInt("allnum"));
+	
+	vi.setTypeClass(DBService.queryObject("select name from typeclass where id = "+rs.getInt("typeClass")+";").toString().trim());
+	vi.setTime(rs.getDate("time"));
+	vi.setActors(((rs.getString("actors") ==""||rs.getString("actors")==null)?"":rs.getString("actors")).trim());
+	vi.setDaoyan(rs.getString("daoyan").trim());
+	vi.setLanguage(DBService.queryObject("select name from concreteClass where id = "+rs.getInt("language")+";").toString().trim());
+	out.println("-"+rs.getInt("typeClass")+"-");
+	}
+	catch(Exception e)
+	{
+		e.printStackTrace();
+		response.sendRedirect("./error.jsp?err="+request.getRequestURL());
+		return;
+	}
+}
+%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -9,9 +80,9 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="renderer" content="webkit">
 <meta name="applicable-device" content="pc,mobile">
-<meta name="keywords" content="如果蜗牛有爱情免费在线观看,如果蜗牛有爱情剧情介绍,如果蜗牛有爱情电影海报">
-<meta name="description" content="如果蜗牛有爱情剧情:女主许诩（王子文饰）和男主季白（王凯饰）是看似关系冷淡的师徒，却是生死相依的战友，更是相互钦慕的爱..">
-<title>大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网</title>
+<meta name="keywords" content="<%=vi.getName()%>">
+<meta name="description" content="<%=vi.getSummary().length()>30?vi.getSummary().substring(0,30)+"..":vi.getSummary() %>">
+<title><%=vi.getName() %>-小飞猪视频网</title>
 
 <link href="./css/default.css" rel="stylesheet">
 
@@ -115,7 +186,14 @@ top.location.href =window.location.href;
 <!------------------------------ header end --------------------------------->
 <!--------------------------- dtextlink start ------------------------------->
 <div id="dtextlink" class="wrap border-gray fn-clear">
-<div class="textlink fn-left"><strong>您所在的位置：</strong><a href="./index.jsp">首页</a>&nbsp;&nbsp;»&nbsp;&nbsp;<a href="http://www.xiguage.net/f/2.html">电视剧</a>&nbsp;&nbsp;»&nbsp;&nbsp;<a href="http://www.xiguage.net/f/12.html">大陆剧</a>&nbsp;&nbsp;»&nbsp;&nbsp;如果蜗牛有爱情</div>
+<div class="textlink fn-left"><strong>您所在的位置：</strong>
+<a href="./index.jsp">首页</a>&nbsp;&nbsp;»&nbsp;&nbsp;
+<a href='<%="./search.jsp?keyword="+vi.getTypeClass() %>'><%=vi.getTypeClass() %></a>&nbsp;&nbsp;»&nbsp;&nbsp;
+<a href='<%="./search.jsp?keyword="+(vi.getTypeClass().equals("电影")?(vi.getProperty().split("\\s+|，|,|\\|"))[0]:(vi.getTypeClass().equals("电视")?vi.getArea():"")) %>'>
+<%=((vi.getTypeClass().equals("电影"))?(vi.getProperty().split("\\s+|，|,|\\|"))[0]:((vi.getTypeClass().equals("电视"))?vi.getArea():"-")) %>
+</a>&nbsp;&nbsp;»&nbsp;&nbsp;
+<%=vi.getName() %>
+</div>
 </div>
 <!---------------------- ---- -dtextlink end ----------------------------- -->
 <!----------------------------- content start ------------------------------->
@@ -123,56 +201,71 @@ top.location.href =window.location.href;
 <!------------------------------ ui-box start-------------------------------->
 <div class="ui-box border-gray clearfix">
 <div class="playfrom jsfrom tab1 clearfix">
-<span class="laiyuan">西瓜哥有话说&nbsp;<i class="arrow"></i></span>
+<span class="laiyuan">鹏飞哥有话说&nbsp;<i class="arrow"></i></span>
+
 </div>
 <div id="box-jqjieshao">
-<span style="color:#E53333;">提示：据网友留言告知出现大部分电影失效，本站正在努力抢修中，请大家稍安勿躁。另外大家要通过微信端观看的话请使用 wx.xiguage.net</span>
+<%=notice %>
+
 </div>
 </div>
 <!------------------------------ ui-box end--------------------------------->
 <div class="border-gray clearfix" id="detail-box">
 <span class="zkjuzhao">展开剧照</span>
 <div class="detail-pic">
-<img src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/a8c0009f6080beeb.jpg" alt="如果蜗牛有爱情">
+<img src="<%=vi.getImage() %>" alt="<%=vi.getName() %>">
 </div>
 <div class="detail-info fn-left">
 <div class="detail-title fn-clear">
-<h2>如果蜗牛有爱情</h2>
+<h2><%=vi.getName() %></h2>
 <div style="display:none"><span id="hit">61110</span><script>getVideoHit('30447')</script></div>
 </div>
 <div class="info fn-clear">
 <dl>
 <dl>
 <dt><i class="iconfont m-r-2 f-s-14 m-t-5">󰃖</i>主演：</dt>
-<dd><a href="http://www.xiguage.net/search.php?searchword=%E7%8E%8B%E5%87%AF">王凯</a>&nbsp;&nbsp;<a href="http://www.xiguage.net/search.php?searchword=%E7%8E%8B%E5%AD%90%E6%96%87">王子文</a>&nbsp;&nbsp;<a href="http://www.xiguage.net/search.php?searchword=%E5%BE%90%E6%82%A6">徐悦</a>&nbsp;&nbsp;<a href="http://www.xiguage.net/search.php?searchword=%E4%BA%8E%E6%81%92">于恒</a>&nbsp;&nbsp;</dd>
+<dd>
+<%
+String[] sActors = new String[5];
+sActors = vi.getActors().split("\\s+|，|,|\\|",5);
+for(int i=0;i<sActors.length;i++)
+{
+	sActors[i]= sActors[i].trim();
+%>
+<a href="./search.php?searchword=<%=sActors[i] %>"><%=sActors[i] %></a>&nbsp;&nbsp;
+<%
+}
+%>
+</dd>
 </dl>
 <dl class="fn-left">
 <dt><i class="iconfont m-r-2 f-s-15 m-t-5">㐴</i>时间：</dt>
-<dd><span id="addtime">2016-11-18 23:34</span></dd>
+<dd><span id="addtime"><%=vi.getTime() %></span></dd>
 </dl>
 <dl class="fn-right">
 <dt><i class="iconfont m-r-2 f-s-14 m-t-5">󰁣</i>年份：</dt>
-<dd><span>2016</span></dd>
+<dd><span><%=vi.getTime().getYear()+1970 %></span></dd>
 </dl>
 <dl class="fn-left">
 <dt><i class="iconfont m-r-2 f-s-14 m-t-5">󰃡</i>状态：</dt>
-<dd>更新至15集</dd>
+<dd><%=(vi.getAllnum()==vi.getCurnum()?(vi.getAllnum()==1?"":"共"+vi.getAllnum()+"集 ")+"已完结":"更新至"+vi.getCurnum()+"集") %></dd>
 </dl>
 <dl class="fn-right">
 <dt><i class="iconfont m-r-2 f-s-14 m-t-5">󰃍</i>地区：</dt>
-<dd><span>大陆</span></dd>
+<dd><span><%=vi.getArea() %></span></dd>
 </dl>
 <dl class="fn-left">
 <dt><i class="iconfont m-r-2 f-s-15 m-t-5">󰃋</i>语言：</dt>
-<dd><span>国语</span></dd>
+<dd><span><%=vi.getLanguage() %></span></dd>
 </dl>
 <dl class="fn-right">
 <dt><i class="iconfont m-r-2 f-s-14 m-t-5">󰄭</i>导演：</dt>
-<dd><a href="http://www.xiguage.net/search.php?searchword=%E5%BC%A0%E5%BC%80%E5%AE%99">张开宙</a>&nbsp;&nbsp;</dd>
+<dd><a href="./search.php?searchword=<%=vi.getDaoyan() %>"><%=vi.getDaoyan() %></a>&nbsp;&nbsp;</dd>
 </dl>
 <dl class="juqing">
 <dt><i class="iconfont m-r-2 f-s-14 m-t-5">󰆘</i>剧情：</dt>
-<dd>女主许诩（王子文饰）和男主季白（王凯饰）是看似关系冷淡的师徒，却是生死相依的战友，更是相互钦慕的爱..<a href="http://www.xiguage.net/m/30447.html#box-jqjieshao">【详细】</a></dd>
+<dd><%=vi.getSummary().length()>50?vi.getSummary().substring(0,50)+"..":vi.getSummary() %>
+<a href="./showInfo.jsp#box-jqjieshao">【详细】</a></dd>
 </dl>
 </dl>
 </div>
@@ -220,12 +313,28 @@ top.location.href =window.location.href;
 <div class="playfrom jsfrom tab1 clearfix">
 <span class="laiyuan">播放地址&nbsp;<i class="arrow"></i></span>
 <ul>
-<li id="tab1" onclick="setTab(&#39;tab&#39;,&#39;stab&#39;,1,1)" class="on"><i class="playerico ico-qq"></i><span class="f">腾讯视频</span></li>
+<li id="tab1" onclick="setTab(&#39;tab&#39;,&#39;stab&#39;,1,1)" class="on">
+<i class="playerico ico-qq"></i><span class="f">视频</span></li>
 </ul>
 </div>
 <div id="stab1" class="playlist jsplist clearfix flod">
 <ul class="playul">
-<li><a title="第1集" href="http://www.xiguage.net/p/30447-0-0.html" target="_self">第1集</a></li><li><a title="第2集" href="http://www.xiguage.net/p/30447-0-1.html" target="_self">第2集</a></li><li><a title="第3集" href="http://www.xiguage.net/p/30447-0-2.html" target="_self">第3集</a></li><li><a title="第4集" href="http://www.xiguage.net/p/30447-0-3.html" target="_self">第4集</a></li><li><a title="第5集" href="http://www.xiguage.net/p/30447-0-4.html" target="_self">第5集</a></li><li><a title="第6集" href="http://www.xiguage.net/p/30447-0-5.html" target="_self">第6集</a></li><li><a title="第7集" href="http://www.xiguage.net/p/30447-0-6.html" target="_self">第7集</a></li><li><a title="第8集" href="http://www.xiguage.net/p/30447-0-7.html" target="_self">第8集</a></li><li><a title="第9集" href="http://www.xiguage.net/p/30447-0-8.html" target="_self">第9集</a></li><li><a title="第10集" href="http://www.xiguage.net/p/30447-0-9.html" target="_self">第10集</a></li><li><a title="第11集" href="http://www.xiguage.net/p/30447-0-10.html" target="_self">第11集</a></li><li><a title="第12集" href="http://www.xiguage.net/p/30447-0-11.html" target="_self">第12集</a></li><li><a title="第13集" href="http://www.xiguage.net/p/30447-0-12.html" target="_self">第13集</a></li><li><a title="第14集" href="http://www.xiguage.net/p/30447-0-13.html" target="_self">第14集</a></li><li><a title="第15集" href="http://www.xiguage.net/p/30447-0-14.html" target="_self">第15集</a></li>
+<%
+if(vi.getAllnum()==1)
+{%>
+	<li><a title="播放" href="./show.jsp?id=<%=id %>&cur=0" target="_self">播放</a></li>
+<%
+}
+else
+{
+	for(int i=1;i<=vi.getCurnum();i++)
+	{
+		%>
+		<li><a title="第<%=i %>集" href="./show.jsp?id=<%=id %>&cur=<%=i %>" target="_self">第<%=i %>集</a></li>
+		<%
+	}
+}
+%>
 </ul>
 </div>
 </div>
@@ -337,7 +446,7 @@ top.location.href =window.location.href;
 <span class="laiyuan">剧情简介&nbsp;<i class="arrow"></i></span>
 </div>
 <div id="box-jqjieshao">
-女主许诩（王子文饰）和男主季白（王凯饰）是看似关系冷淡的师徒，却是生死相依的战友，更是相互钦慕的爱人。季白是深沉冷酷的资深神探，许诩是一位犯罪心理研究的天才新人。两人在联手破获一桩大案之后，季白对这个单纯睿智的爱徒新生爱慕，奈何无论他如何明追暗夺，这个如“蜗牛”般迟钝的女孩，就是收不到爱的信号。就在二人“谈情说案”之际，沉寂已久的“天使杀手”悚然重现，将他们卷入极致甜蜜、却也极致艰险的追凶之旅 。
+<%=vi.getSummary() %>
 </div>
 </div>
 <div class="ui-box border-gray clearfix">

@@ -81,19 +81,20 @@ update concreteClass set pid=@tmp where pid is null;
 
 create table videoInfo(
 	id int unsigned primary key auto_increment,
-	name varchar(100),
-	summary varchar(500),
-	typeClass int unsigned,
-	area int unsigned,
-	time int unsigned,
+	name varchar(100) not null,
+	summary varchar(500) not null,
+	typeClass int unsigned not null,
+	area int unsigned not null,
+	time int unsigned not null,
 	language int unsigned,
+	property varchar(15) not null;
 	click int unsigned default 0,
-	addtime datetime,
-	image varchar(300),
-	video varchar(300),
+	addtime datetime not null,
+	image varchar(300) not null,
+	video varchar(300)not null,
 	daoyan varchar(10),
 	actors varchar(20),
 	zimu varchar(300),
-  curnum int unsigned,
-  allnum int unsigned
+  	curnum int unsigned,
+  	allnum int unsigned
 	)ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

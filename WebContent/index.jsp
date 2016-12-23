@@ -1,5 +1,8 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
+<%@page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
+<%@page import="java.sql.ResultSet" %>
+<%@page import="service.DBService" %>
+<%@page import="bean.VideoInfo" %>
 <!DOCTYPE html>
 <!-- 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -78,8 +81,16 @@ top.location.href =window.location.href;
 <div class="ui-box border-gray clearfix">
 <div class="playfrom jsfrom tab1 clearfix"><span class="laiyuan">鹏飞哥有话说&nbsp;<i
 	class="arrow"></i></span></div>
-<div id="box-jqjieshao"><span style="color: #E53333;">提示：据网友留言告知出现大部分电影失效，本站正在努力抢修中，请大家稍安勿躁。另外大家要通过微信端观看的话请使用
-wx.xiguage.net</span></div>
+<div id="box-jqjieshao">
+<%
+String sql = "select notice from config;";
+ResultSet rs = DBService.query(sql);
+if(rs.next())
+{
+	out.println("<span style='color: #E53333;'>提示："+rs.getString("notice")+"</span>");
+}
+%>
+</div>
 </div>
 <!---------------------------- -- ui-box1 end -------- ------------------------->
 <!------------------------------ ui-box2 start --------------------------------->
@@ -92,21 +103,46 @@ wx.xiguage.net</span></div>
 <div class="module-content">
 <ul class="yun-list clearfix" id="yun-list">
 
+<%
+sql = "select name,summary,video,image,curnum,allnum from videoInfo order by click desc limit 12;";
+rs = DBService.query(sql);
+while(rs.next())
+{
+VideoInfo vi = new VideoInfo();
+try
+{
+vi.setName(rs.getString("name"));
+vi.setSummary(rs.getString("summary"));
+vi.setVideo(rs.getString("video"));
+vi.setImage(rs.getString("image"));
+vi.setCurnum(rs.getInt("curnum"));
+vi.setAllnum(rs.getInt("allnum"));
+%>
+
 	<li class="yun yun-large  border-gray"><a class="yun-link"
-		href="http://www.xiguage.net/m/30603.html" title="举重妖精金福珠">
+		href="./index/" title="<%=vi.getName() %>" >
 	<div class="img"><img class="lazy"
-		data-original="http://dy.pic.wlbgt.com/uploads/allimg/201611/0c1c1860a57d558c.png"
-		src="./西瓜哥电影网-在线云点播,手机高清云影院,百度网盘电影_files/0c1c1860a57d558c.png"
-		alt="举重妖精金福珠" style="display: block;"> <span class="bgb">
+		data-original="<%=vi.getImage() %>"
+		src="<%=vi.getImage() %>"
+		alt="<%=vi.getName() %>" style="display: block;"> <span class="bgb">
 	<i class="bgbbg"></i>
-	<p class="name">更新至2集</p>
-	<p class="other">剧情：南柱赫和李圣经二人是以模特儿出道，俊男美女完美组合，早前合作过《奶酪陷阱》后，此番终于联手成为新剧的男女主角，主演了新..</p>
-	</span></div>
+	<p class="name"><%=(vi.getAllnum()==vi.getCurnum()?(vi.getAllnum()==1?"":"共"+vi.getAllnum()+"集 ")+"已完结":"更新至"+vi.getCurnum()+"集") %></p>
+	<p class="other">剧情：<%=vi.getSummary().length()>60?vi.getSummary().substring(0,60)+"..":vi.getSummary() %></p>
+	</span></div> 
 	<div class="text">
-	<p class="name">举重妖精金福珠</p>
+	<p class="name"><%=vi.getName() %></p>
 	<p class="actor">分类：日韩剧</p>
 	</div>
-	</a></li>
+	</a></li>	
+	
+<%
+}
+catch(Exception e)
+{
+	e.printStackTrace();
+}
+}
+%>
 
 	<li class="yun yun-large  border-gray"><a class="yun-link"
 		href="http://www.xiguage.net/m/30598.html" title="蓝色大海的传说">
@@ -295,43 +331,72 @@ wx.xiguage.net</span></div>
 <h2 class="module-title"><i class="iconfont m-r-7 f-s-25 m-t-2">󰉾</i>热门电影推荐</h2>
 
 <ul class="s-title_f12">
+<%
+sql = "select name from concreteclass where pid!=id and pid=(select id  from concreteclass where name='分类') ;";
+rs = DBService.query(sql);
+while(rs.next())
+{	
+try
+{	
+%>
+<li><a href=<%="./search.jsp?分类="+rs.getString("name") %> target="_blank"><%=rs.getString("name") %></a></li>	
+<%
+}
+catch(Exception e)
+{
+	e.printStackTrace();
+}
 
-	<li><a href="http://www.xiguage.net/f/5.html" target="_blank">动作片</a></li>
-
-	<li><a href="http://www.xiguage.net/f/6.html" target="_blank">喜剧片</a></li>
-
-	<li><a href="http://www.xiguage.net/f/7.html" target="_blank">爱情片</a></li>
-
-	<li><a href="http://www.xiguage.net/f/8.html" target="_blank">科幻片</a></li>
-
-	<li><a href="http://www.xiguage.net/f/9.html" target="_blank">剧情片</a></li>
-
-	<li><a href="http://www.xiguage.net/f/10.html" target="_blank">恐怖片</a></li>
-
-	<li><a href="http://www.xiguage.net/f/11.html" target="_blank">战争片</a></li>
-
+}
+%>
 </ul>
 
-<a class="more" href="http://www.xiguage.net/f/1.html" target="_blank"
+<a class="more" href="./search?typeClass=电影>" target="_blank"
 	title="更多">更多</a></div>
 <div class="module-content">
 <ul class="yun-list clearfix" id="yun-list">
 
+<%
+sql = "select name,summary,video,image,curnum,allnum from videoInfo where typeClass=(select id from typeclass where name='电影' ) order by click desc limit 12;";
+rs = DBService.query(sql);
+while(rs.next())
+{
+VideoInfo vi = new VideoInfo();
+try
+{
+vi.setName(rs.getString("name"));
+vi.setSummary(rs.getString("summary"));
+vi.setVideo(rs.getString("video"));
+vi.setImage(rs.getString("image"));
+vi.setCurnum(rs.getInt("curnum"));
+vi.setAllnum(rs.getInt("allnum"));
+%>
+	
 	<li class="yun yun-large  border-gray"><a class="yun-link"
-		href="http://www.xiguage.net/m/29885.html" title="谍影重重5">
+		href="http://www.xiguage.net/m/30597.html" title="<%=vi.getName() %>">
 	<div class="img"><img class="lazy"
-		data-original="http://dy.pic.wlbgt.com/uploads/allimg/201608/ccc5306f1a6347a7.png"
-		src="./西瓜哥电影网-在线云点播,手机高清云影院,百度网盘电影_files/noimage.gif" alt="谍影重重5">
+		data-original="<%=vi.getImage() %>"
+		src="<%=vi.getImage() %>" alt="<%=vi.getName() %>">
 
 	<span class="bgb"> <i class="bgbbg"></i>
-	<p class="name">高清</p>
-	<p class="other">剧情：《谍影重重5》故事背景设定在后斯诺登时代，讲述了杰森·伯恩失踪后得知背后的阴谋，再次现身展开斗争的故事</p>
+	<p class="name">HD</p>
+	<p class="other">剧情：<%=vi.getSummary().length()>60?vi.getSummary().substring(0,60)+"..":vi.getSummary() %></p>
 	</span></div>
 	<div class="text">
-	<p class="name">谍影重重5</p>
-	<p class="actor">分类：动作片</p>
+	<p class="name"><%=vi.getName() %></p>
+	<p class="actor">分类：爱情片</p>
 	</div>
-	</a></li>
+	</a></li>	
+	
+<%
+}
+catch(Exception e)
+{
+	e.printStackTrace();
+}
+}
+%>
+
 
 	<li class="yun yun-large  border-gray"><a class="yun-link"
 		href="http://www.xiguage.net/m/30597.html" title="盛先生的花儿">
@@ -721,21 +786,71 @@ wx.xiguage.net</span></div>
 <h2 class="module-title"><i class="iconfont m-r-7 f-s-25 m-t-2">󰂑</i>热门电视剧推荐</h2>
 
 <ul class="s-title_f12">
+<%
+sql = "select name from concreteclass where pid!=id and pid=(select id  from concreteclass where name='地区') ;";
+rs = DBService.query(sql);
+while(rs.next())
+{	
+try
+{	
+%>
+<li><a href=<%="./search.jsp?地区="+rs.getString("name") %> target="_blank"><%=rs.getString("name") %></a></li>	
+<%
+}
+catch(Exception e)
+{
+	e.printStackTrace();
+}
 
-	<li><a href="http://www.xiguage.net/" target="_blank">大陆剧</a></li>
-
-	<li><a href="http://www.xiguage.net/" target="_blank">港台剧</a></li>
-
-	<li><a href="http://www.xiguage.net/" target="_blank">日韩剧</a></li>
-
-	<li><a href="http://www.xiguage.net/" target="_blank">欧美剧</a></li>
-
+}
+%>
 </ul>
 
 <a class="more" href="http://www.xiguage.net/f/2.html" target="_blank"
 	title="更多">更多</a></div>
 <div class="module-content">
 <ul class="yun-list clearfix" id="yun-list">
+
+<%
+sql = "select name,summary,video,image,curnum,allnum from videoInfo where typeClass=(select id from typeclass where name='电视') order by click desc limit 12;";
+rs = DBService.query(sql);
+while(rs.next())
+{
+VideoInfo vi = new VideoInfo();
+try
+{
+vi.setName(rs.getString("name"));
+vi.setSummary(rs.getString("summary"));
+vi.setVideo(rs.getString("video"));
+vi.setImage(rs.getString("image"));
+vi.setCurnum(rs.getInt("curnum"));
+vi.setAllnum(rs.getInt("allnum"));
+%>
+	
+	<li class="yun yun-large  border-gray"><a class="yun-link"
+		href="http://www.xiguage.net/m/30601.html" title="<%=vi.getName() %>">
+	<div class="img"><img class="lazy"
+		data-original="<%=vi.getImage() %>"
+		src="<%=vi.getImage() %>" alt="<%=vi.getName() %>">
+
+	<span class="bgb"> <i class="bgbbg"></i>
+	<p class="name"><%=(vi.getAllnum()==vi.getCurnum()?(vi.getAllnum()==1?"":"共"+vi.getAllnum()+"集 ")+"已完结":"更新至"+vi.getCurnum()+"集") %></p>
+	<p class="other">剧情：<%=vi.getSummary().length()>60?vi.getSummary().substring(0,60)+"..":vi.getSummary() %></p>
+	</span></div>
+	<div class="text">
+	<p class="name"><%=vi.getName() %></p>
+	<p class="actor">分类：日韩剧</p>
+	</div>
+	</a></li>
+	
+<%
+}
+catch(Exception e)
+{
+	e.printStackTrace();
+}
+}
+%>
 
 	<li class="yun yun-large  border-gray"><a class="yun-link"
 		href="http://www.xiguage.net/m/30601.html" title="哦，我的金雨">
