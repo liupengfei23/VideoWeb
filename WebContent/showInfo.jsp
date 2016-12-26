@@ -12,9 +12,9 @@ id = Integer.parseInt(request.getParameter("id"));
 catch(Exception e)
 {
 	e.printStackTrace();
-	id=1;
-	//response.sendRedirect(request.getContextPath()+"/error.jsp?err="+request.getRequestURL());
-	//return;
+	String tmp = request.getContextPath()+"/error.jsp?err="+request.getRequestURL();
+	response.sendRedirect(tmp);
+	return;
 }
 
 //读取提示语
@@ -55,7 +55,7 @@ if(rs.next())
 	vi.setImage(rs.getString("image").trim());
 	vi.setCurnum(rs.getInt("curnum"));
 	vi.setAllnum(rs.getInt("allnum"));
-	
+
 	vi.setTypeClass(DBService.queryObject("select name from typeclass where id = "+rs.getInt("typeClass")+";").toString().trim());
 	vi.setTime(rs.getDate("time"));
 	vi.setActors(((rs.getString("actors") ==""||rs.getString("actors")==null)?"":rs.getString("actors")).trim());

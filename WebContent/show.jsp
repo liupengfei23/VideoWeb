@@ -12,7 +12,42 @@ String sql = "select * from videoInfo where id=" + id +";";
 ResultSet rs = DBService.query(sql);
 if(rs.next())
 {
+	try
+	{
+	vi.setArea(DBService.queryObject("select name from concreteClass where id = "+rs.getInt("area")+";").toString());
+	String [] s_property = new String[5];
+	String result_property = "";
+	s_property = rs.getString("property").split(" ",5);
+	for(int i=0;i<s_property.length;i++)
+	{
+		String tmp = DBService.queryObject("select name from concreteClass where id = "+Integer.parseInt(s_property[i])+";").toString();
+		if(i==0)result_property += (tmp!=null?tmp:"");
+		else
+			result_property += (tmp!=null?" "+tmp:"");
+	}
+	vi.setProperty(result_property.trim());
+	vi.setName(rs.getString("name").trim());
+	vi.setSummary(rs.getString("summary").trim());
+	vi.setVideo(rs.getString("video").trim());
+	vi.setImage(rs.getString("image").trim());
+	vi.setCurnum(rs.getInt("curnum"));
+	vi.setAllnum(rs.getInt("allnum"));
+
+	vi.setTypeClass(DBService.queryObject("select name from typeclass where id = "+rs.getInt("typeClass")+";").toString().trim());
+	vi.setTime(rs.getDate("time"));
+	vi.setActors(((rs.getString("actors") ==""||rs.getString("actors")==null)?"":rs.getString("actors")).trim());
+	vi.setDaoyan(rs.getString("daoyan").trim());
+	vi.setLanguage(DBService.queryObject("select name from concreteClass where id = "+rs.getInt("language")+";").toString().trim());
 	
+	vi.setZimu((rs.getString("zimu")=="" || rs.getString("zimu")==null)?"":rs.getString("zimu"));
+	//out.println("-"+rs.getInt("typeClass")+"-");
+	}
+	catch(Exception e)
+	{
+		e.printStackTrace();
+		response.sendRedirect("./error.jsp?err="+request.getRequestURL());
+		return;
+	}
 }
 %>
 <!DOCTYPE html>
@@ -24,7 +59,7 @@ if(rs.next())
 <meta name="format-detection" content="telephone=no">
 <meta name="renderer" content="webkit">
 <meta name="applicable-device" content="pc,mobile">
-<title>在线观看大陆剧&lt;锦绣未央&gt;第16集高清版 www.XIGUAGE.net</title>
+<title>在线观看&lt;<%=vi.getName() %>&gt;</title>
 <script src="./js/push.js"></script>
 <script src="./js/myplay.js"></script>
 <script src="./js/rich.js" type="text/javascript"></script>
@@ -32,7 +67,7 @@ if(rs.next())
 <body>
 <div id="cci1frame"
 	style="height: 0px; width: 0px; display: none; wiidth: 100% px; heiight: 520px;"></div>
-<script>var playn='锦绣未央', playp='第16集';</script>
+<script>var playn='<%=vi.getName()%>', playp='';</script>
 <link href="./css/default.css" rel="stylesheet">
 <script>var sitePath=''</script>
 <script src="./js/1.7.2.min.js"></script>
@@ -50,21 +85,33 @@ top.location.href =window.location.href;
 <!------------------------------ header end --------------------------------->
 <!--------------------------- dtextlink start ------------------------------->
 <div id="dtextlink" class="wrap border-gray fn-clear">
-<div class="textlink fn-left"><strong>您所在的位置：</strong><a
-	href="http://www.xiguage.net/">首页</a>&nbsp;&nbsp;»&nbsp;&nbsp;<a
-	href="http://www.xiguage.net/f/2.html">电视剧</a>&nbsp;&nbsp;»&nbsp;&nbsp;<a
-	href="http://www.xiguage.net/f/12.html">大陆剧</a>&nbsp;&nbsp;»&nbsp;&nbsp;<a
-	href="http://www.xiguage.net/m/30573.html">锦绣未央</a></div>
+<div class="textlink fn-left"><strong>您所在的位置：</strong>
+<a href="./index.jsp">首页</a>&nbsp;&nbsp;»&nbsp;&nbsp;
+<a href='<%="./search.jsp?keyword="+vi.getTypeClass() %>'><%=vi.getTypeClass() %>
+		</a>&nbsp;&nbsp;»&nbsp;&nbsp;
+<a href='<%="./search.jsp?keyword="+(vi.getTypeClass().equals("电影")?(vi.getProperty().split("\\s+|，|,|\\|"))[0]:(vi.getTypeClass().equals("电视")?vi.getArea():"")) %>'>
+	<%=((vi.getTypeClass().equals("电影"))?(vi.getProperty().split("\\s+|，|,|\\|"))[0]:((vi.getTypeClass().equals("电视"))?vi.getArea():"-")) %>
+	</a>&nbsp;&nbsp;»&nbsp;&nbsp;<a
+	href="./showInfo.jsp?id=<%=id %>"><%=vi.getName() %></a></div>
 </div>
 <!----------------------------dtextlink end --------------------------------->
 <!---------------------------- content start -------------------------------->
 <div id="content" class="wrap clearfix">
 
 <div class="ui-box border-gray clearfix">
-<div class="playfrom jsfrom tab1 clearfix"><span class="laiyuan">西瓜哥有话说&nbsp;<i
+<div class="playfrom jsfrom tab1 clearfix"><span class="laiyuan">鹏飞哥有话说&nbsp;<i
 	class="arrow"></i></span></div>
-<div id="box-jqjieshao"><span style="color: #E53333;">提示：据网友留言告知出现大部分电影失效，本站正在努力抢修中，请大家稍安勿躁。另外大家要通过微信端观看的话请使用
-wx.xiguage.net</span></div>
+<%
+//读取提示语
+String notice = "";
+sql = "select notice from config;";
+rs = DBService.query(sql);
+if(rs.next())
+{
+	notice = "<span style='color: #E53333;'>提示："+rs.getString("notice")+"</span>";
+}
+%>
+<div id="box-jqjieshao"><span style="color: #E53333;">提示：<%=notice %></span></div>
 </div>
 
 <div class="border-gray clearfix" id="play-box">
@@ -79,7 +126,7 @@ wx.xiguage.net</span></div>
 </div>
 <iframe id="cciframe" scrolling="no" frameborder="0" allowfullscreen=""
 	width="100%" height="520"
-	src="./videoPlayer.jsp">
+	src="./videoPlayer.jsp?name=<%=vi.getName() %>&video=<%=vi.getVideo() %>&image=<%=vi.getImage() %>&zimu=<%=vi.getZimu() %>">
 </iframe>
 </div>
 </div>
@@ -144,46 +191,31 @@ wx.xiguage.net</span></div>
 	class="arrow"></i></span>
 <ul>
 	<li id="tab1" onclick="setTab(&#39;tab&#39;,&#39;stab&#39;,1,1)"
-		class="on"><i class="playerico ico-youku"></i><span class="f">优酷</span></li>
+		class="on"><i class="playerico ico-youku"></i><span class="f">播放</span></li>
 </ul>
 </div>
 
 
 <div id="stab1" class="playlist jsplist clearfix flod">
 <ul class="playul">
-	<li><a title="第1集" href="http://www.xiguage.net/p/30573-0-0.html"
-		target="_self">第1集</a></li>
-	<li><a title="第2集" href="http://www.xiguage.net/p/30573-0-1.html"
-		target="_self">第2集</a></li>
-	<li><a title="第3集" href="http://www.xiguage.net/p/30573-0-2.html"
-		target="_self">第3集</a></li>
-	<li><a title="第4集" href="http://www.xiguage.net/p/30573-0-3.html"
-		target="_self">第4集</a></li>
-	<li><a title="第5集" href="http://www.xiguage.net/p/30573-0-4.html"
-		target="_self">第5集</a></li>
-	<li class="v"><a title="第6集"
-		href="http://www.xiguage.net/p/30573-0-5.html" target="_self">第6集</a></li>
-	<li><a title="第7集" href="http://www.xiguage.net/p/30573-0-6.html"
-		target="_self">第7集</a></li>
-	<li><a title="第8集" href="http://www.xiguage.net/p/30573-0-7.html"
-		target="_self">第8集</a></li>
-	<li><a title="第9集" href="http://www.xiguage.net/p/30573-0-8.html"
-		target="_self">第9集</a></li>
-	<li><a title="第10集" href="http://www.xiguage.net/p/30573-0-9.html"
-		target="_self">第10集</a></li>
-	<li><a title="第11集"
-		href="http://www.xiguage.net/p/30573-0-10.html" target="_self">第11集</a></li>
-	<li><a title="第12集"
-		href="http://www.xiguage.net/p/30573-0-11.html" target="_self">第12集</a></li>
-	<li><a title="第13集"
-		href="http://www.xiguage.net/p/30573-0-12.html" target="_self">第13集</a></li>
-	<li><a title="第14集"
-		href="http://www.xiguage.net/p/30573-0-13.html" target="_self">第14集</a></li>
-	<li><a title="第15集"
-		href="http://www.xiguage.net/p/30573-0-14.html" target="_self">第15集</a></li>
-	<li><a title="第16集"
-		href="http://www.xiguage.net/p/30573-0-15.html" style="color: red"
-		target="_self">第16集</a></li>
+
+<%
+if(vi.getAllnum()==1)
+{%>
+	<li><a title="播放" href="./show.jsp?id=<%=id %>&cur=0" target="_self" style="color: red">播放</a></li>
+<%
+}
+else
+{
+	for(int i=1;i<=vi.getCurnum();i++)
+	{
+		%>
+		<li><a title="第<%=i %>集" href="./show.jsp?id=<%=id %>&cur=<%=i %>" target="_self" <%=(cur==i)?"class='v' style='color: red'":"" %>>第<%=i %>集</a></li>
+		<%
+	}
+}
+%>
+
 </ul>
 </div>
 </div>
@@ -193,7 +225,7 @@ wx.xiguage.net</span></div>
 <div class="playfrom jsfrom tab1 clearfix"><span class="laiyuan">剧情简介&nbsp;<i
 	class="arrow"></i></span></div>
 <div id="box-jqjieshao">
-<div>南北朝期间，群雄逐鹿，烽烟四起，战事纷争不断。出身北凉王族的少女心儿，本是天真善良的无忧公主，过着万人宠爱、恣意随性的快乐日子。然因北魏元帅蒋南为抢战功，欺君罔上擅自出兵，导致北凉上下一夜之间血流成河，天之骄女被迫流落异乡。北魏太傅府遗弃在乡下的庶女李未央意外救了心儿，后又因掩护心儿被追兵杀害。心儿不得不以李未央之名，勇敢地活下去，一个人背负起两个女孩的命运与苦难。回到太傅府，化名李未央的心儿不仅要与仇敌蒋氏一族斗智斗勇，还意外卷入与北魏皇子的情仇纠葛。苦难与坎坷没有将她打倒，反而赋予她无上的智慧与心胸，她历尽艰险磨难，终为父系一族正名，同时也收获了曲折感人的美好爱情</div>
+<div><%=vi.getSummary() %></div>
 </div>
 </div>
 

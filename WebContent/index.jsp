@@ -104,23 +104,23 @@ if(rs.next())
 <ul class="yun-list clearfix" id="yun-list">
 
 <%
-sql = "select name,summary,video,image,curnum,allnum from videoInfo order by click desc limit 12;";
+sql = "select * from videoInfo order by click desc limit 12;";
 rs = DBService.query(sql);
 while(rs.next())
 {
 VideoInfo vi = new VideoInfo();
 try
 {
-vi.setName(rs.getString("name"));
-vi.setSummary(rs.getString("summary"));
-vi.setVideo(rs.getString("video"));
-vi.setImage(rs.getString("image"));
+vi.setName(rs.getString("name").trim());
+vi.setSummary(rs.getString("summary").trim());
+vi.setVideo(rs.getString("video").trim());
+vi.setImage(rs.getString("image").trim());
 vi.setCurnum(rs.getInt("curnum"));
 vi.setAllnum(rs.getInt("allnum"));
 %>
 
 	<li class="yun yun-large  border-gray"><a class="yun-link"
-		href="./index/" title="<%=vi.getName() %>" >
+		href='./showInfo.jsp?id=<%=rs.getInt("id") %>' title="<%=vi.getName() %>" >
 	<div class="img"><img class="lazy"
 		data-original="<%=vi.getImage() %>"
 		src="<%=vi.getImage() %>"
@@ -131,7 +131,7 @@ vi.setAllnum(rs.getInt("allnum"));
 	</span></div> 
 	<div class="text">
 	<p class="name"><%=vi.getName() %></p>
-	<p class="actor">分类：日韩剧</p>
+	<p class="actor">分类：<%=((vi.getTypeClass().equals("电影"))?(vi.getProperty().split("\\s+|，|,|\\|"))[0]:((vi.getTypeClass().equals("电视"))?vi.getArea():"-")) %></p>
 	</div>
 	</a></li>	
 	
@@ -140,6 +140,8 @@ vi.setAllnum(rs.getInt("allnum"));
 catch(Exception e)
 {
 	e.printStackTrace();
+	response.sendRedirect(request.getContextPath()+"/error.jsp?err="+request.getRequestURL());
+	return;
 }
 }
 %>
@@ -332,19 +334,21 @@ catch(Exception e)
 
 <ul class="s-title_f12">
 <%
-sql = "select name from concreteclass where pid!=id and pid=(select id  from concreteclass where name='分类') ;";
+sql = "select * from concreteclass where pid!=id and pid=(select id  from concreteclass where name='分类') ;";
 rs = DBService.query(sql);
 while(rs.next())
 {	
 try
 {	
 %>
-<li><a href=<%="./search.jsp?分类="+rs.getString("name") %> target="_blank"><%=rs.getString("name") %></a></li>	
+<li><a href=<%="./search.jsp?id="+rs.getString("id") %> target="_blank"><%=rs.getString("name") %></a></li>	
 <%
 }
 catch(Exception e)
 {
 	e.printStackTrace();
+	response.sendRedirect(request.getContextPath()+"/error.jsp?err="+request.getRequestURL());
+	return;
 }
 
 }
@@ -357,23 +361,23 @@ catch(Exception e)
 <ul class="yun-list clearfix" id="yun-list">
 
 <%
-sql = "select name,summary,video,image,curnum,allnum from videoInfo where typeClass=(select id from typeclass where name='电影' ) order by click desc limit 12;";
+sql = "select * from videoInfo where typeClass=(select id from typeclass where name='电影' ) order by click desc limit 12;";
 rs = DBService.query(sql);
 while(rs.next())
 {
 VideoInfo vi = new VideoInfo();
 try
 {
-vi.setName(rs.getString("name"));
-vi.setSummary(rs.getString("summary"));
-vi.setVideo(rs.getString("video"));
-vi.setImage(rs.getString("image"));
+vi.setName(rs.getString("name").trim());
+vi.setSummary(rs.getString("summary").trim());
+vi.setVideo(rs.getString("video").trim());
+vi.setImage(rs.getString("image").trim());
 vi.setCurnum(rs.getInt("curnum"));
 vi.setAllnum(rs.getInt("allnum"));
 %>
 	
 	<li class="yun yun-large  border-gray"><a class="yun-link"
-		href="http://www.xiguage.net/m/30597.html" title="<%=vi.getName() %>">
+		href='./showInfo.jsp?id=<%=rs.getInt("id") %>' title="<%=vi.getName() %>">
 	<div class="img"><img class="lazy"
 		data-original="<%=vi.getImage() %>"
 		src="<%=vi.getImage() %>" alt="<%=vi.getName() %>">
@@ -384,7 +388,7 @@ vi.setAllnum(rs.getInt("allnum"));
 	</span></div>
 	<div class="text">
 	<p class="name"><%=vi.getName() %></p>
-	<p class="actor">分类：爱情片</p>
+	<p class="actor">分类：<%=((vi.getTypeClass().equals("电影"))?(vi.getProperty().split("\\s+|，|,|\\|"))[0]:((vi.getTypeClass().equals("电视"))?vi.getArea():"-")) %></p>
 	</div>
 	</a></li>	
 	
@@ -393,6 +397,8 @@ vi.setAllnum(rs.getInt("allnum"));
 catch(Exception e)
 {
 	e.printStackTrace();
+	response.sendRedirect(request.getContextPath()+"/error.jsp?err="+request.getRequestURL());
+	return;
 }
 }
 %>
@@ -800,6 +806,8 @@ try
 catch(Exception e)
 {
 	e.printStackTrace();
+	response.sendRedirect(request.getContextPath()+"/error.jsp?err="+request.getRequestURL());
+	return;
 }
 
 }
@@ -812,7 +820,7 @@ catch(Exception e)
 <ul class="yun-list clearfix" id="yun-list">
 
 <%
-sql = "select name,summary,video,image,curnum,allnum from videoInfo where typeClass=(select id from typeclass where name='电视') order by click desc limit 12;";
+sql = "select * from videoInfo where typeClass=(select id from typeclass where name='电视') order by click desc limit 12;";
 rs = DBService.query(sql);
 while(rs.next())
 {
@@ -828,7 +836,7 @@ vi.setAllnum(rs.getInt("allnum"));
 %>
 	
 	<li class="yun yun-large  border-gray"><a class="yun-link"
-		href="http://www.xiguage.net/m/30601.html" title="<%=vi.getName() %>">
+		href='./showInfo.jsp?id=<%=rs.getInt("id") %>' title="<%=vi.getName() %>">
 	<div class="img"><img class="lazy"
 		data-original="<%=vi.getImage() %>"
 		src="<%=vi.getImage() %>" alt="<%=vi.getName() %>">
@@ -839,7 +847,7 @@ vi.setAllnum(rs.getInt("allnum"));
 	</span></div>
 	<div class="text">
 	<p class="name"><%=vi.getName() %></p>
-	<p class="actor">分类：日韩剧</p>
+	<p class="actor">分类：<%=((vi.getTypeClass().equals("电影"))?(vi.getProperty().split("\\s+|，|,|\\|"))[0]:((vi.getTypeClass().equals("电视"))?vi.getArea():"-")) %></p>
 	</div>
 	</a></li>
 	
@@ -848,6 +856,8 @@ vi.setAllnum(rs.getInt("allnum"));
 catch(Exception e)
 {
 	e.printStackTrace();
+	response.sendRedirect(request.getContextPath()+"/error.jsp?err="+request.getRequestURL());
+	return;
 }
 }
 %>
