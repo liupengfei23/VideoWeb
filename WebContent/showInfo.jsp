@@ -1,5 +1,5 @@
 <%@page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+    pageEncoding="UTF-8" errorPage="error.jsp"%>
 <%@page import="java.sql.ResultSet" %>
 <%@page import="service.DBService" %>
 <%@page import="bean.VideoInfo" %>
@@ -12,9 +12,9 @@ id = Integer.parseInt(request.getParameter("id"));
 catch(Exception e)
 {
 	e.printStackTrace();
-	String tmp = request.getContextPath()+"/error.jsp?err="+request.getRequestURL();
-	response.sendRedirect(tmp);
-	return;
+	//String tmp = request.getContextPath()+"/error.jsp?err="+request.getRequestURL();
+	//response.sendRedirect(tmp);
+	//return;
 }
 
 //读取提示语
@@ -29,6 +29,8 @@ if(rs.next())
 //点击次数加1
 sql = "update videoInfo set click=click+1 where id = "+id +";";
 DBService.update(sql);
+
+//out.println(sql);
 //读取视频信息
 sql = "select * from videoInfo where id = "+id+";";
 rs = DBService.query(sql);
@@ -57,18 +59,20 @@ if(rs.next())
 	vi.setAllnum(rs.getInt("allnum"));
 
 	vi.setTypeClass(DBService.queryObject("select name from typeclass where id = "+rs.getInt("typeClass")+";").toString().trim());
-	vi.setTime(rs.getDate("time"));
+	vi.setTime((DBService.queryObject("select name from concreteClass where id ="+rs.getInt("time")+";")).toString().trim());
 	vi.setActors(((rs.getString("actors") ==""||rs.getString("actors")==null)?"":rs.getString("actors")).trim());
 	vi.setDaoyan(rs.getString("daoyan").trim());
 	vi.setLanguage(DBService.queryObject("select name from concreteClass where id = "+rs.getInt("language")+";").toString().trim());
-	out.println("-"+rs.getInt("typeClass")+"-");
+	//out.println("-"+rs.getInt("typeClass")+"-");
+	vi.setClick(rs.getInt("click"));
 	}
 	catch(Exception e)
 	{
 		e.printStackTrace();
-		response.sendRedirect("./error.jsp?err="+request.getRequestURL());
-		return;
+		//response.sendRedirect("./error.jsp?err="+request.getRequestURL());
+		//return;
 	}
+
 }
 %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -97,7 +101,7 @@ if(rs.next())
 <script src="./js/jquery.lazyload.js" type="text/javascript"></script>
 <script type="text/javascript">
 if (window!=top)
-top.location.href =window.location.href;
+	top.location.href =window.location.href;
 </script>
 <script src="./js/share.js" type="text/javascript"></script>
 <script src="./js/changyan.js" type="text/javascript"></script>
@@ -166,10 +170,6 @@ top.location.href =window.location.href;
 	#SOHUCS #SOHU_MAIN .bind-phone-wrapper-dw .cont-title-dw .title-close-dw{float:right;width:18px;height:18px;overflow:hidden;margin:0 12px 0 0;background:url(//changyan.sohu.com/mdevp/extensions/phone-verify/004/image/b17.png);cursor:pointer}#SOHUCS #SOHU_MAIN .bind-phone-wrapper-dw .cont-title-dw .title-close-dw:hover{background:url(//changyan.sohu.com/mdevp/extensions/phone-verify/004/image/b18.png)}#SOHUCS #SOHU_MAIN .bind-phone-wrapper-dw .cont-title-dw .title-name-dw{font-size:14px;font-weight:700;display:inline-block;padding:0 0 0 20px;color:#333}#SOHUCS #SOHU_MAIN .bind-phone-wrapper-dw .cont-form-dw{padding:30px 0 0;height:33px;overflow:hidden}#SOHUCS #SOHU_MAIN .bind-phone-wrapper-dw .cont-form-dw .form-name-dw{float:left;line-height:16px;padding:9px 12px 0 0;width:90px;text-align:right;font-size:14px;color:#333}#SOHUCS #SOHU_MAIN .bind-phone-wrapper-dw .cont-form-dw .form-action-dw .action-text-dfw{width:254px;height:31px;line-height:31px;padding:0 0 0 8px;font-size:14px;float:left;vertical-align:-4px;border:1px solid #ccd4d9;color:#333}#SOHUCS #SOHU_MAIN .bind-phone-wrapper-dw .cont-prompt-dw{height:16px;line-height:16px;overflow:hidden;padding:0 0 0 102px!important;margin:5px 0 4px;color:#ee542a}#SOHUCS #SOHU_MAIN .bind-phone-wrapper-dw .cont-verify-dw{height:33px;overflow:hidden}#SOHUCS #SOHU_MAIN .bind-phone-wrapper-dw .cont-verify-dw .verify-name-dw{float:left;font-size:14px;line-height:16px;padding:9px 12px 0 0;text-align:right;width:90px;color:#333}#SOHUCS #SOHU_MAIN .bind-phone-wrapper-dw .cont-verify-dw .verify-action-dw .action-text-dfw{float:left;font-size:14px;height:31px;line-height:31px;padding:0 0 0 8px;width:98px;border:1px solid #ccd4d9;color:#333}#SOHUCS #SOHU_MAIN .bind-phone-wrapper-dw .cont-verify-dw .verify-action-dw .verify-btn-dw{float:left;width:146px;height:33px;overflow:hidden;line-height:34px;margin-left:10px;text-align:center;color:#fff;background-color:#5488af;font-size:14px;cursor:pointer}
 	#SOHUCS #SOHU_MAIN .bind-phone-wrapper-dw .cont-verify-dw .verify-action-dw .verify-time-dw{display:none;float:left;width:134px;height:31px;overflow:hidden;line-height:32px;margin-left:10px;padding:0 5px;border:1px solid #d1d2d4;color:#9a9a9a;background-color:#f5f6f8}#SOHUCS #SOHU_MAIN .bind-phone-wrapper-dw .cont-btn-dw{height:33px;overflow:hidden;padding:0 0 0 102px}div.windows-define-dg a{color:#44708e;text-decoration:none}#SOHUCS #SOHU_MAIN .bind-phone-wrapper-dw .cont-btn-dw .btn-dfw{width:78px;height:33px;padding:0;cursor:pointer;border:0;background-image:url(//changyan.sohu.com/mdevp/extensions/phone-verify/004/image/bg11.gif)}#SOHUCS #SOHU_MAIN .bind-phone-wrapper-dw .cont-btn-dw .btn-dfw:hover{background-image:url(//changyan.sohu.com/mdevp/extensions/phone-verify/004/image/bg12.gif)}#SOHUCS #SOHU_MAIN .module-cmt-list .wrap-action-gw .action-click-gw .module-prop-prompt{width:181px;height:80px;background:url(//changyan.sohu.com/mdevp/extensions/first-login-prompt/003/image/prompt-prop.png);position:absolute;right:10px;top:-84px}#SOHUCS #SOHU_MAIN .module-cmt-header .section-cbox-w .block-head-w .module-person-page-prompt{width:193px;height:80px;background:url(//changyan.sohu.com/mdevp/extensions/first-login-prompt/003/image/prompt-person-page.png);position:absolute;top:40px;left:56px}#SOHUCS #SOHU_MAIN .module-cmt-header .section-cbox-w .block-head-w .module-person-page-prompt .prompt-close-btn,#SOHUCS #SOHU_MAIN .module-cmt-list .wrap-action-gw .action-click-gw .module-prop-prompt .prompt-close-btn{width:14px;height:14px;display:block;position:absolute;right:0;top:0;cursor:pointer}
 </style>
-<script type="text/javascript" charset="UTF-8" src="./cmt-header.js"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/cmt-box.js.下载"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/cmt-list.js.下载"></script>
-<script type="text/javascript" charset="UTF-8" src="./cy-av.js"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/cmt-footer.js.下载"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/hot-topic.js.下载"></script>
-<script type="text/javascript" charset="UTF-8" src="./face.js"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/cmt-float-bar.js.下载"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/cy-user-page.js.下载"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/cy-user-info.js.下载"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/cy-user-avatar.js.下载"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/cy-user-view.js.下载"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/cy-user-task.js.下载"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/cy-user-footprint.js.下载"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/cy-prop.js.下载"></script>
-<script type="text/javascript" charset="UTF-8" src="./cy-report.js"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/cy-user-notice.js.下载"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/cy-user-feedback.js.下载"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/cy-user-set.js.下载"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/cmt-notice.js.下载"></script><script type="text/javascript" charset="UTF-8" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/cy-grade.js.下载"></script>
 <script type="text/javascript" charset="UTF-8" src="./cy-score.js"></script>
 <script type="text/javascript" charset="UTF-8" src="./jump-url.js"></script>
 <script type="text/javascript" charset="UTF-8" src="./disable-user-photo.js"></script>
@@ -232,19 +232,19 @@ for(int i=0;i<sActors.length;i++)
 {
 	sActors[i]= sActors[i].trim();
 %>
-<a href="./search.php?searchword=<%=sActors[i] %>"><%=sActors[i] %></a>&nbsp;&nbsp;
+<a href="./search.jsp?searchword=<%=sActors[i] %>"><%=sActors[i] %></a>&nbsp;&nbsp;
 <%
 }
 %>
 </dd>
 </dl>
 <dl class="fn-left">
-<dt><i class="iconfont m-r-2 f-s-15 m-t-5">㐴</i>时间：</dt>
-<dd><span id="addtime"><%=vi.getTime() %></span></dd>
+<dt><i class="iconfont m-r-2 f-s-15 m-t-5">㐴</i>浏览：</dt>
+<dd><span id="addtime"><%=vi.getClick() %>次</span></dd>
 </dl>
 <dl class="fn-right">
 <dt><i class="iconfont m-r-2 f-s-14 m-t-5">󰁣</i>年份：</dt>
-<dd><span><%=vi.getTime().getYear()+1970 %></span></dd>
+<dd><span><%=vi.getTime() %></span></dd>
 </dl>
 <dl class="fn-left">
 <dt><i class="iconfont m-r-2 f-s-14 m-t-5">󰃡</i>状态：</dt>
@@ -260,12 +260,12 @@ for(int i=0;i<sActors.length;i++)
 </dl>
 <dl class="fn-right">
 <dt><i class="iconfont m-r-2 f-s-14 m-t-5">󰄭</i>导演：</dt>
-<dd><a href="./search.php?searchword=<%=vi.getDaoyan() %>"><%=vi.getDaoyan() %></a>&nbsp;&nbsp;</dd>
+<dd><a href="./search.jsp?searchword=<%=vi.getDaoyan() %>"><%=vi.getDaoyan() %></a>&nbsp;&nbsp;</dd>
 </dl>
 <dl class="juqing">
 <dt><i class="iconfont m-r-2 f-s-14 m-t-5">󰆘</i>剧情：</dt>
 <dd><%=vi.getSummary().length()>50?vi.getSummary().substring(0,50)+"..":vi.getSummary() %>
-<a href="./showInfo.jsp#box-jqjieshao">【详细】</a></dd>
+<a href="#box-jqjieshao">【详细】</a></dd>
 </dl>
 </dl>
 </div>
@@ -347,96 +347,51 @@ else
 <div class="hello-box clearfix">
 <div class="module-content">
 <ul class="yun-list clearfix" id="yun-list">
-<li class="yun yun-large  border-gray">
-<a class="yun-link" href="http://www.xiguage.net/m/28630.html" title="咱们结婚吧">
-<div class="img">
-<img class="lazy" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/6535fdd2eccd7044.jpg" alt="咱们结婚吧">
-<span class="bgb">
-<i class="bgbbg"></i>
-<p class="name">完结</p>
-<p class="other">剧情：杨桃是一家四星级酒店的大堂经理，由于在感情中受过伤，三十二岁的她依然单身一人。三十三岁的果然在婚姻..</p>
-</span>
-</div>
-<div class="text">
-<p class="name">咱们结婚吧</p><p class="actor">主演：高圆圆 黄海波 凯丽 王彤 柳岩 傅迦 大左</p>
-</div>
-</a>
-</li>
-<li class="yun yun-large  border-gray">
-<a class="yun-link" href="http://www.xiguage.net/m/28568.html" title="新萧十一郎">
-<div class="img">
-<img class="lazy" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/dff6cc95723318ba.gif" alt="新萧十一郎">
-<span class="bgb">
-<i class="bgbbg"></i>
-<p class="name">完结</p>
-<p class="other">剧情：该剧讲述了侠盗萧十一郎在一次意外追逐中卷入了武林传说中人人窥伺神秘宝物之争，引起了武林中人人争夺的..</p>
-</span>
-</div>
-<div class="text">
-<p class="name">新萧十一郎</p><p class="actor">主演：严屹宽，李依晓，朱一龙，甘婷婷，吕良伟，张含韵，元华，王艺曈，于青斌，杨净如</p>
-</div>
-</a>
-</li>
-<li class="yun yun-large  border-gray">
-<a class="yun-link" href="http://www.xiguage.net/m/29580.html" title="六扇门">
-<div class="img">
-<img class="lazy" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/95bb58cc20a7b061.jpg" alt="六扇门">
-<span class="bgb">
-<i class="bgbbg"></i>
-<p class="name">完结</p>
-<p class="other">剧情：该剧主要讲述在明朝中叶时期，六扇门全力侦查京城连环杀人案而引出陈年宫廷旧案的故事</p>
-</span>
-</div>
-<div class="text">
-<p class="name">六扇门</p><p class="actor">主演：林峯 迪丽热巴 方中信 孙耀琦 罗晋 黄文豪 郭芮溪 应昊茗</p>
-</div>
-</a>
-</li>
-<li class="yun yun-large  border-gray">
-<a class="yun-link" href="http://www.xiguage.net/m/30539.html" title="灵魂摆渡">
-<div class="img">
-<img class="lazy" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/9a8fdb693efb493d.jpg" alt="灵魂摆渡">
-<span class="bgb">
-<i class="bgbbg"></i>
-<p class="name">完结</p>
-<p class="other">剧情：《灵魂摆渡》是《打狗棍》原班底打造的爱奇艺自制大剧。以从小独具 “阴阳眼”的冬青奇特的所见所闻为线..</p>
-</span>
-</div>
-<div class="text">
-<p class="name">灵魂摆渡</p><p class="actor">主演：刘智扬 于毅 肖茵 梁椰雯 小冉 杨逸飞 杜若溪 陈洁 刘芊含 满意</p>
-</div>
-</a>
-</li>
-<li class="yun yun-large  border-gray">
-<a class="yun-link" href="http://www.xiguage.net/m/30035.html" title="士兵突击">
-<div class="img">
-<img class="lazy" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/b1af7811a9b63522.gif" alt="士兵突击">
-<span class="bgb">
-<i class="bgbbg"></i>
-<p class="name">完结</p>
-<p class="other">剧情：30集电视剧《士兵突击》，改编自话剧《爱尔纳·突击》，由著名导演康红雷执导、兰晓龙编剧，王宝强、陈..</p>
-</span>
-</div>
-<div class="text">
-<p class="name">士兵突击</p><p class="actor">主演：王宝强 张译 段奕宏 陈思诚 邢佳栋 张国强</p>
-</div>
-</a>
-</li>
-<li class="yun yun-large  border-gray">
-<a class="yun-link" href="http://www.xiguage.net/m/30474.html" title="一起长大">
-<div class="img">
-<img class="lazy" src="./大陆剧《如果蜗牛有爱情》在线播放,如果蜗牛有爱情剧情介绍-西瓜哥电影网_files/f13b5acf2d306324.jpg" alt="一起长大">
-<span class="bgb">
-<i class="bgbbg"></i>
-<p class="name">完结</p>
-<p class="other">剧情：万辉投资公司总裁万天野与妻子丁曼在结婚纪念日突然离婚，丁曼远走美国。送走丁曼后万天野搭载了一对父子..</p>
-</span>
-</div>
-<div class="text">
-<p class="name">一起长大</p><p class="actor">主演：邵兵 王子文 杨玏 王海地 张培 李立群</p>
-</div>
-</a>
-</li>
+
+<%
+sql = "select * from videoInfo where id!="+id+" and property = (select id from concreteClass where name like '%"+(vi.getProperty().trim().split("\\s+|，|,|\\|",5))[0]+"%')  order by click desc limit 6;";
+rs = DBService.query(sql);
+while(rs.next())
+{
+VideoInfo vi_ = new VideoInfo();
+try
+{
+vi_.setName(rs.getString("name").trim());
+vi_.setSummary(rs.getString("summary").trim());
+vi_.setVideo(rs.getString("video").trim());
+vi_.setImage(rs.getString("image").trim());
+vi_.setActors(rs.getString("actors").trim());
+vi_.setCurnum(rs.getInt("curnum"));
+vi_.setAllnum(rs.getInt("allnum"));
+%>
+	<li class="yun yun-large  border-gray">
+	<a class="yun-link" href='./showInfo.jsp?id=<%=rs.getInt("id") %>' title="<%=vi_.getName() %>">
+	<div class="img">
+	<img class="lazy" src="<%=vi_.getImage() %>" alt="<%=vi_.getName() %>">
+	<span class="bgb">
+	<i class="bgbbg"></i>
+	<p class="name"><%=(vi_.getAllnum()==vi_.getCurnum()?(vi_.getAllnum()==1?"":"共"+vi_.getAllnum()+"集 ")+"已完结":"更新至"+vi_.getCurnum()+"集") %></p>
+	<p class="other">剧情：<%=vi_.getSummary().length()>60?vi_.getSummary().substring(0,60)+"..":vi_.getSummary() %></p>
+	</span>
+	</div>
+	<div class="text">
+	<p class="name"><%=vi_.getName() %></p>
+	<p class="actor">主演：<%=vi_.getActors() %></p>
+	</div>
+	</a>
+	</li>	
+	
+<%
+}
+catch(Exception e)
+{
+	e.printStackTrace();
+	//response.sendRedirect(request.getContextPath()+"/error.jsp?err="+request.getRequestURL());
+	//return;
+}
+}
+%>
+
 </ul>
 </div>
 </div>

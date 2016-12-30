@@ -12,7 +12,7 @@ public class VideoInfo {
 	//video area
 	String area;
 	//video time
-	Date time;
+	String time;
 	//video language
 	String language;
 	//the number of click, default 0
@@ -63,10 +63,10 @@ public class VideoInfo {
 	public void setArea(String area) {
 		this.area = area;
 	}
-	public Date getTime() {
+	public String getTime() {
 		return time;
 	}
-	public void setTime(Date time) {
+	public void setTime(String time) {
 		this.time = time;
 	}
 	public String getLanguage() {

@@ -1,8 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+	pageEncoding="UTF-8" errorPage="./error.jsp"%>
 <%@page import="java.sql.ResultSet" %>
 <%@page import="service.DBService" %>
 <%@page import="bean.VideoInfo" %>
+<%@page import="java.io.File" %>
 <%!int id=0;  int cur=1; %>
 <%
 id = Integer.parseInt((request.getParameter("id")==null||request.getParameter("id")=="")?"0":request.getParameter("id"));
@@ -28,13 +29,75 @@ if(rs.next())
 	vi.setProperty(result_property.trim());
 	vi.setName(rs.getString("name").trim());
 	vi.setSummary(rs.getString("summary").trim());
-	vi.setVideo(rs.getString("video").trim());
-	vi.setImage(rs.getString("image").trim());
 	vi.setCurnum(rs.getInt("curnum"));
 	vi.setAllnum(rs.getInt("allnum"));
-
 	vi.setTypeClass(DBService.queryObject("select name from typeclass where id = "+rs.getInt("typeClass")+";").toString().trim());
-	vi.setTime(rs.getDate("time"));
+	
+	//dir=new File("Video/"+rs.getString("video"));
+	
+	File dir=new File(this.getServletContext().getInitParameter("VideoPath")+rs.getString("video").trim());;
+
+	//dir=new File(this.getServletContext().getInitParameter("VideoPath")+rs.getString("video").trim());
+	//out.println(this.getServletContext().getInitParameter("VideoPath")+"-----");
+	//out.println(rs.getString("video").trim());
+	out.println(dir.isFile());
+	//out.println(dir.isDirectory());
+	//if(!dir.exists())throw new Exception();
+	if(dir.isDirectory())
+	{
+		File[] list = dir.listFiles();
+		for(File tmp:list)
+		{
+			//out.println(tmp.getPath()+"*********");
+			//out.println(",,,,,"+cur+".mp4");
+			if(tmp.getName().equalsIgnoreCase(cur+".mp4")||tmp.getName().equals(cur+".ogg")||tmp.getName().equalsIgnoreCase(cur+".webm"))
+			{
+				if(tmp.isFile())vi.setVideo("Video/"+dir.getName()+"/"+tmp.getName());
+			}
+		}
+	}
+	else if(dir.isFile())
+	{
+		vi.setVideo("Video/"+rs.getString("video").trim());
+	}
+	else if(rs.getString("video").trim().startsWith("http://")||rs.getString("video").trim().startsWith("www."))
+	{
+		vi.setVideo(rs.getString("video").trim());
+		//vi.setVideo(dir.toString());
+	}
+	else
+	{
+		throw new Exception();
+	}
+	
+	if(rs.getString("image")!=null)
+	{
+		//out.println(this.getServletContext().getInitParameter("ImagePath")+rs.getString("image").trim());
+		//vi.setVideo(vi.getVideo().replace('\\','/'));
+		dir=new File(this.getServletContext().getInitParameter("ImagePath")+rs.getString("image").trim());
+		//out.println(this.getServletContext().getInitParameter("VideoPath")+"-----");
+		//out.println(dir.getAbsolutePath());
+		//out.println(dir.isFile());
+		//out.println(dir.isDirectory());
+		//if(!dir.exists())throw new Exception();
+		if(dir.isFile())
+		{
+			vi.setImage("Images/"+rs.getString("image").trim());
+		}
+		else if(rs.getString("image").trim().startsWith("http://")||rs.getString("image").trim().startsWith("www."))
+		{
+			vi.setImage(rs.getString("image").trim());
+			//vi.setVideo(dir.toString());
+		}
+		else
+		{
+			throw new Exception();
+		}
+	}
+	//vi.setImage(rs.getString("image").trim());
+	//out.println(vi.getVideo());
+
+	vi.setTime((DBService.queryObject("select name from concreteClass where id="+rs.getInt("time")+";")).toString().trim());
 	vi.setActors(((rs.getString("actors") ==""||rs.getString("actors")==null)?"":rs.getString("actors")).trim());
 	vi.setDaoyan(rs.getString("daoyan").trim());
 	vi.setLanguage(DBService.queryObject("select name from concreteClass where id = "+rs.getInt("language")+";").toString().trim());
@@ -45,8 +108,8 @@ if(rs.next())
 	catch(Exception e)
 	{
 		e.printStackTrace();
-		response.sendRedirect("./error.jsp?err="+request.getRequestURL());
-		return;
+		//response.sendRedirect("./error.jsp?err="+request.getRequestURL());
+		//return;
 	}
 }
 %>
@@ -87,20 +150,17 @@ top.location.href =window.location.href;
 <div id="dtextlink" class="wrap border-gray fn-clear">
 <div class="textlink fn-left"><strong>您所在的位置：</strong>
 <a href="./index.jsp">首页</a>&nbsp;&nbsp;»&nbsp;&nbsp;
-<a href='<%="./search.jsp?keyword="+vi.getTypeClass() %>'><%=vi.getTypeClass() %>
+<a href='<%="./search.jsp?typeClass="+rs.getInt("typeClass") %>'><%=vi.getTypeClass() %>
 		</a>&nbsp;&nbsp;»&nbsp;&nbsp;
-<a href='<%="./search.jsp?keyword="+(vi.getTypeClass().equals("电影")?(vi.getProperty().split("\\s+|，|,|\\|"))[0]:(vi.getTypeClass().equals("电视")?vi.getArea():"")) %>'>
+<a href='<%="./search.jsp?id="+(vi.getTypeClass().equals("电影")?(rs.getString("property").split("\\s+|，|,|\\|"))[0]:(vi.getTypeClass().equals("电视")?rs.getInt("area"):"0")) %>'>
 	<%=((vi.getTypeClass().equals("电影"))?(vi.getProperty().split("\\s+|，|,|\\|"))[0]:((vi.getTypeClass().equals("电视"))?vi.getArea():"-")) %>
-	</a>&nbsp;&nbsp;»&nbsp;&nbsp;<a
-	href="./showInfo.jsp?id=<%=id %>"><%=vi.getName() %></a></div>
+	</a>&nbsp;&nbsp;»&nbsp;&nbsp;
+	<a href="./showInfo.jsp?id=<%=id %>"><%=vi.getName() %></a></div>
 </div>
 <!----------------------------dtextlink end --------------------------------->
 <!---------------------------- content start -------------------------------->
 <div id="content" class="wrap clearfix">
 
-<div class="ui-box border-gray clearfix">
-<div class="playfrom jsfrom tab1 clearfix"><span class="laiyuan">鹏飞哥有话说&nbsp;<i
-	class="arrow"></i></span></div>
 <%
 //读取提示语
 String notice = "";
@@ -109,10 +169,16 @@ rs = DBService.query(sql);
 if(rs.next())
 {
 	notice = "<span style='color: #E53333;'>提示："+rs.getString("notice")+"</span>";
+%>
+<div class="ui-box border-gray clearfix">
+<div class="playfrom jsfrom tab1 clearfix"><span class="laiyuan">鹏飞哥有话说&nbsp;<i
+	class="arrow"></i></span></div>
+<div id="box-jqjieshao"><%=notice %></div>
+</div>
+<% 
 }
 %>
-<div id="box-jqjieshao"><span style="color: #E53333;">提示：<%=notice %></span></div>
-</div>
+
 
 <div class="border-gray clearfix" id="play-box">
 <div class="video-info fn-left">
@@ -126,64 +192,10 @@ if(rs.next())
 </div>
 <iframe id="cciframe" scrolling="no" frameborder="0" allowfullscreen=""
 	width="100%" height="520"
-	src="./videoPlayer.jsp?name=<%=vi.getName() %>&video=<%=vi.getVideo() %>&image=<%=vi.getImage() %>&zimu=<%=vi.getZimu() %>">
+	src="./videoPlayer.jsp?name=<%=vi.getName() %>&cur=<%=cur %>&video=<%=vi.getVideo() %>&image=<%=vi.getImage() %>&zimu=<%=vi.getZimu() %>">	
 </iframe>
 </div>
 </div>
-<!-- 
-<div class="video-ad fn-right">
-<div class="ui-playad300-260 margin-t10">
-<div align="center"><script type="text/javascript">
-//平台、设备和操作系统
- var system ={
- win : false,
- mac : false,
- xll : false
- };
- //检测平台
- var p = navigator.platform;
- system.win = p.indexOf("Win") == 0;
- system.mac = p.indexOf("Mac") == 0;
- system.x11 = (p == "X11") || (p.indexOf("Linux") == 0);
- //跳转语句
- if(system.win||system.mac||system.xll){
- document.writeln('<script language="javascript" src="http://js.feitian001.com/js/c/11885_1712.js"><\/script>');
- }else{
- document.writeln('');
- }
-</script><script language="javascript"
-	src="./在线观看大陆剧_锦绣未央_第16集高清版 www.XIGUAGE.net_files/11885_1712.js.下载"></script><iframe
-	src="./在线观看大陆剧_锦绣未央_第16集高清版 www.XIGUAGE.net_files/11885_1712.html"
-	width="300" height="250" marginheight="0" marginwidth="0"
-	scrolling="no" frameborder="0"></iframe></div>
-</div>
-<div class="ui-playad300-260 margin-t10">
-<div align="center"><script type="text/javascript">
-//平台、设备和操作系统
- var system ={
- win : false,
- mac : false,
- xll : false
- };
- //检测平台
- var p = navigator.platform;
- system.win = p.indexOf("Win") == 0;
- system.mac = p.indexOf("Mac") == 0;
- system.x11 = (p == "X11") || (p.indexOf("Linux") == 0);
- //跳转语句
- if(system.win||system.mac||system.xll){
- document.writeln('<script language="javascript" src="http://js.feitian001.com/js/c/11885_1712.js"><\/script>');
- }else{
- document.writeln('');
- }
-</script><script language="javascript"
-	src="./在线观看大陆剧_锦绣未央_第16集高清版 www.XIGUAGE.net_files/11885_1712.js.下载"></script><iframe
-	src="./在线观看大陆剧_锦绣未央_第16集高清版 www.XIGUAGE.net_files/11885_1712(1).html"
-	width="300" height="250" marginheight="0" marginwidth="0"
-	scrolling="no" frameborder="0"></iframe></div>
-</div>
-</div>
--->
 </div>
 
 <div class="ui-box border-gray clearfix">

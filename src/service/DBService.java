@@ -60,6 +60,7 @@ public class DBService {
 			return -1;
 		}
 		//st.close();
+		System.out.println("111,sql");
 		return result;
 	}
 	

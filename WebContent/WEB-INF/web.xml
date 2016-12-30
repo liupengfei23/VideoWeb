@@ -9,4 +9,16 @@
     <welcome-file>default.htm</welcome-file>
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
+  <context-param>
+  <param-name>WebName</param-name>
+  <param-value>VideoWeb</param-value>
+  </context-param>
+  <context-param>
+  <param-name>VideoPath</param-name>
+  <param-value>E:/workspace/VideoWeb/Video/</param-value>
+  </context-param>
+  <context-param>
+  <param-name>ImagePath</param-name>
+  <param-value>E:/workspace/VideoWeb/Images/</param-value>
+  </context-param>
 </web-app>

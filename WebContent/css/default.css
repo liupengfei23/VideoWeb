@@ -107,7 +107,7 @@
 #footer_w .footmenu a {font-size:15px;color:#929191;margin:0 5px;}
 /*header*/.header {background-color:#1a1a1a;left:0;top:0;width:100%;height:50px;opacity:0.9;position:relative;z-index:11;}
 .header .wrap {height:50px;}
-.logo {width:140px;float:left;background:url("../images/logo.png") no-repeat 0 10px;}
+.logo {width:140px;float:left;}
 .logo a {display:block;width:150px;height:50px;}
 .menu {float:left;}
 .menu li {float:left;}
@@ -127,7 +127,7 @@ html {font-size:14px;}
 .wrap {width:1200px;}
 #headbar {width:100%;height:100px;background:#fff;min-width:1200px;}
 #logo {float:left;}
-.logo-jpg {width:269px;height:79px;margin-top:12px;float:left;background:url('../images/logo.png') 0 0 no-repeat;}
+.logo-jpg {width:269px;height:79px;margin-top:12px;float:left;background:url('') 0 0 no-repeat;}
 #headbar-right {height:50px;margin:25px 0 0 90px;float:right;}
 #searchbar {width:450px;height:50px;float:left;}
 .ui-search {width:450px;height:50px;overflow:hidden;float:left;}
